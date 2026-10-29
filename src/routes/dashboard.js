@@ -89,4 +89,130 @@ router.get('/pillows', async (req, res) => {
   }
 });
 
+// ─── POST ENDPOINTS — Add products to dashboard sections ─────
+
+// POST /api/dashboard/best-sellers — Add a best seller product
+router.post('/best-sellers', async (req, res) => {
+  try {
+    const { name, description, price, originalPrice, image, category, rating, reviewCount, stock } = req.body;
+
+    if (!name || !price || !category) {
+      return res.status(400).json({ success: false, message: 'name, price, and category are required' });
+    }
+
+    const product = new Product({
+      name,
+      description,
+      price,
+      originalPrice,
+      image,
+      category,
+      isBestSeller: true,
+      isNewArrival: false,
+      rating: rating || 0,
+      reviewCount: reviewCount || 0,
+      stock: stock || 0,
+    });
+
+    await product.save();
+    return res.status(201).json({ success: true, message: 'Best seller product added', data: product });
+  } catch (err) {
+    console.error('Add best seller error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /api/dashboard/new-arrivals — Add a new arrival product
+router.post('/new-arrivals', async (req, res) => {
+  try {
+    const { name, description, price, originalPrice, image, category, rating, reviewCount, stock } = req.body;
+
+    if (!name || !price || !category) {
+      return res.status(400).json({ success: false, message: 'name, price, and category are required' });
+    }
+
+    const product = new Product({
+      name,
+      description,
+      price,
+      originalPrice,
+      image,
+      category,
+      isBestSeller: false,
+      isNewArrival: true,
+      rating: rating || 0,
+      reviewCount: reviewCount || 0,
+      stock: stock || 0,
+    });
+
+    await product.save();
+    return res.status(201).json({ success: true, message: 'New arrival product added', data: product });
+  } catch (err) {
+    console.error('Add new arrival error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /api/dashboard/mattresses — Add a mattress product
+router.post('/mattresses', async (req, res) => {
+  try {
+    const { name, description, price, originalPrice, image, isBestSeller, isNewArrival, rating, reviewCount, stock } = req.body;
+
+    if (!name || !price) {
+      return res.status(400).json({ success: false, message: 'name and price are required' });
+    }
+
+    const product = new Product({
+      name,
+      description,
+      price,
+      originalPrice,
+      image,
+      category: 'mattress',
+      isBestSeller: isBestSeller || false,
+      isNewArrival: isNewArrival || false,
+      rating: rating || 0,
+      reviewCount: reviewCount || 0,
+      stock: stock || 0,
+    });
+
+    await product.save();
+    return res.status(201).json({ success: true, message: 'Mattress product added', data: product });
+  } catch (err) {
+    console.error('Add mattress error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// POST /api/dashboard/pillows — Add a pillow product
+router.post('/pillows', async (req, res) => {
+  try {
+    const { name, description, price, originalPrice, image, isBestSeller, isNewArrival, rating, reviewCount, stock } = req.body;
+
+    if (!name || !price) {
+      return res.status(400).json({ success: false, message: 'name and price are required' });
+    }
+
+    const product = new Product({
+      name,
+      description,
+      price,
+      originalPrice,
+      image,
+      category: 'pillow',
+      isBestSeller: isBestSeller || false,
+      isNewArrival: isNewArrival || false,
+      rating: rating || 0,
+      reviewCount: reviewCount || 0,
+      stock: stock || 0,
+    });
+
+    await product.save();
+    return res.status(201).json({ success: true, message: 'Pillow product added', data: product });
+  } catch (err) {
+    console.error('Add pillow error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 module.exports = router;
