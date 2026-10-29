@@ -3,9 +3,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-// Email verification not used
 const config = require('../config');
-
 const router = express.Router();
 
 // Registration endpoint
@@ -28,10 +26,7 @@ router.post('/register', async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-
-
-// Login endpoint
+//Login endpoint
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;

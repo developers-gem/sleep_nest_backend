@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const config = require('./config');
 const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 app.use(express.json());
@@ -16,6 +17,7 @@ mongoose.connect(config.MONGODB_URI, {
 
 // Register routes
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Basic health check
 app.get('/', (req, res) => {
