@@ -4,6 +4,8 @@ const config = require('./config');
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const itemRoutes = require('./routes/items');
+const paymentRoutes = require('./routes/payment');
+const razorpayRoutes = require('./routes/razorpay');
 
 const app = express();
 
@@ -34,6 +36,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/products', itemRoutes);
 app.use('/api/product', itemRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/payment/razorpay', razorpayRoutes);
 
 // Basic health check
 app.get('/', (req, res) => {
