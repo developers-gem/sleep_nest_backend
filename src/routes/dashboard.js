@@ -215,4 +215,48 @@ router.post('/pillows', async (req, res) => {
   }
 });
 
+// GET /api/dashboard/items — All items
+router.get('/items', async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 });
+    return res.json({ success: true, count: products.length, data: products });
+  } catch (err) {
+    console.error('All dashboard items fetch error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /api/dashboard/all-products — All products alias
+router.get('/all-products', async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 });
+    return res.json({ success: true, count: products.length, data: products });
+  } catch (err) {
+    console.error('All dashboard products fetch error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /api/dashboard/products/:id and /api/dashboard/product/:id — Product Details API
+router.get(['/products/:id', '/product/:id'], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID format' });
+    }
+
+    const item = await Product.findById(id);
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const { formatProductDetails } = require('./items');
+    return res.json({ success: true, data: formatProductDetails(item) });
+  } catch (err) {
+    console.error('Fetch product detail error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
 module.exports = router;
