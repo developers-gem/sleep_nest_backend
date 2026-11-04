@@ -38,8 +38,16 @@ router.post('/login', async (req, res) => {
     // No email verification required
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) return res.status(401).json({ message: 'Invalid credentials' });
-    const token = jwt.sign({ userId: user._id, email: user.email }, config.JWT_SECRET, { expiresIn: '1h' });
-    return res.json({ token, message: "Login successful" });
+    const token = jwt.sign({ userId: user._id, email: user.email }, config.JWT_SECRET, { expiresIn: '30d' });
+    return res.json({
+      token,
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (err) {
     console.error('Login error:', err);
     return res.status(500).json({ message: 'Internal server error' });

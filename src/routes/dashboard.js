@@ -2,7 +2,7 @@ const express = require('express');
 const Product = require('../models/Product');
 const router = express.Router();
 
-// GET /api/dashboard — unified dashboard response with all sections
+
 router.get('/', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
