@@ -127,6 +127,21 @@ function formatProductDetails(item) {
     }
   }
 
+  // Ensure sizeVariants are populated and synced with sizes
+  let sizeVariants = Array.isArray(doc.sizeVariants) && doc.sizeVariants.length > 0
+    ? doc.sizeVariants
+    : sizes.map((s) => ({
+        size: s,
+        price: doc.price || 0,
+        originalPrice: doc.originalPrice || undefined,
+        stock: doc.stock || 0,
+      }));
+
+  // Keep sizes array in sync
+  if (sizeVariants.length > 0) {
+    sizes = sizeVariants.map(v => v.size);
+  }
+
   // Ensure default specs if missing
   let specs = doc.specs && typeof doc.specs === 'object' && Object.keys(doc.specs).length > 0 ? doc.specs : null;
   if (!specs || Object.keys(specs).length === 0) {
@@ -165,6 +180,7 @@ function formatProductDetails(item) {
     image: images[0],
     images,
     sizes,
+    sizeVariants,
     specs,
   };
 }
@@ -264,7 +280,7 @@ router.get('/:id', async (req, res) => {
 // ─── POST /api/items — Create a new item ──────────────────────────
 router.post('/', async (req, res) => {
   try {
-    const {
+    let {
       name,
       brand,
       description,
@@ -274,6 +290,7 @@ router.post('/', async (req, res) => {
       image,
       images,
       sizes,
+      sizeVariants,
       specs,
       material,
       tags,
@@ -285,6 +302,31 @@ router.post('/', async (req, res) => {
       stock,
       inStock,
     } = req.body;
+
+    // Process sizeVariants if provided
+    let cleanVariants = [];
+    if (Array.isArray(sizeVariants) && sizeVariants.length > 0) {
+      cleanVariants = sizeVariants
+        .filter(v => v && (typeof v.size === 'string') && v.size.trim())
+        .map(v => ({
+          size: v.size.trim(),
+          price: Number(v.price) || 0,
+          originalPrice: v.originalPrice ? Number(v.originalPrice) : undefined,
+          stock: v.stock !== undefined ? Number(v.stock) : 0,
+        }));
+
+      if (cleanVariants.length > 0) {
+        if (!sizes || sizes.length === 0) {
+          sizes = cleanVariants.map(v => v.size);
+        }
+        if (price === undefined || isNaN(Number(price)) || Number(price) <= 0) {
+          price = cleanVariants[0].price;
+        }
+        if (!originalPrice && cleanVariants[0].originalPrice) {
+          originalPrice = cleanVariants[0].originalPrice;
+        }
+      }
+    }
 
     if (!name || price === undefined || !category) {
       return res.status(400).json({
@@ -303,6 +345,7 @@ router.post('/', async (req, res) => {
       image: image || (images && images.length ? images[0] : ''),
       images: images || (image ? [image] : []),
       sizes: sizes || [],
+      sizeVariants: cleanVariants,
       specs: specs || {},
       material: material || '',
       tags: tags || [],
@@ -335,7 +378,29 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid item ID format' });
     }
 
-    const item = await Product.findByIdAndUpdate(id, req.body, {
+    const updateData = { ...req.body };
+
+    if (Array.isArray(updateData.sizeVariants) && updateData.sizeVariants.length > 0) {
+      updateData.sizeVariants = updateData.sizeVariants
+        .filter(v => v && (typeof v.size === 'string') && v.size.trim())
+        .map(v => ({
+          size: v.size.trim(),
+          price: Number(v.price) || 0,
+          originalPrice: v.originalPrice ? Number(v.originalPrice) : undefined,
+          stock: v.stock !== undefined ? Number(v.stock) : 0,
+        }));
+
+      if (updateData.sizeVariants.length > 0) {
+        if (!updateData.sizes || updateData.sizes.length === 0) {
+          updateData.sizes = updateData.sizeVariants.map(v => v.size);
+        }
+        if (updateData.price === undefined && updateData.sizeVariants.length > 0) {
+          updateData.price = updateData.sizeVariants[0].price;
+        }
+      }
+    }
+
+    const item = await Product.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -379,4 +444,5 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.formatProductDetails = formatProductDetails;
 module.exports = router;

@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 
+const sizeVariantSchema = new mongoose.Schema({
+  size: { type: String, required: true, trim: true },
+  price: { type: Number, required: true },
+  originalPrice: { type: Number },
+  stock: { type: Number, default: 0 },
+}, { _id: false });
+
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   brand: { type: String, trim: true, default: 'SleepNest' },
@@ -10,6 +17,7 @@ const productSchema = new mongoose.Schema({
   image: { type: String },
   images: [{ type: String }],
   sizes: [{ type: String }],
+  sizeVariants: [sizeVariantSchema],
   specs: { type: Map, of: String },
   material: { type: String, trim: true },
   tags: [{ type: String }],
